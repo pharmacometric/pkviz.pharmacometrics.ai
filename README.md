@@ -6,9 +6,9 @@ __PKVis is an advanced pharmacokinetic modeling platform designed for researcher
 
 ### With PKVis, you can:
 
- - Simulate drug concentration-time profiles using various pharmacokinetic models
+- Simulate drug concentration-time profiles using various pharmacokinetic models
 
- - Compare different dosing regimens and patient parameters
+- Compare different dosing regimens and patient parameters
 
  - Visualize pharmacokinetic data with interactive plots
  
