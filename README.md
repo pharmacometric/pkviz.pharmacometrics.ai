@@ -2,7 +2,7 @@
 
 ### Website: https://pkviz.pharmacometrics.ai
 
-PKVis is an advanced pharmacokinetic modeling platform designed for researchers, clinicians, and students in the field of drug development and clinical pharmacology. This comprehensive tool allows users to explore, analyze, and simulate drug disposition with industry-leading PK models.
+__PKVis is an advanced pharmacokinetic modeling platform designed for researchers, clinicians, and students in the field of drug development and clinical pharmacology. This comprehensive tool allows users to explore, analyze, and simulate drug disposition with industry-leading PK models.__
 
 ### With PKVis, you can:
 
