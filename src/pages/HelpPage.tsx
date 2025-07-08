@@ -1,36 +1,32 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { HelpCircle, MessageCircle, Mail, Phone, FileText } from 'lucide-react';
+import { HelpCircle, Mail, Linkedin, Github } from 'lucide-react';
 
 const HelpPage: React.FC = () => {
   const helpOptions = [
-    {
-      title: 'Live Chat',
-      description: 'Get instant help from our support team',
-      icon: MessageCircle,
-      color: 'from-blue-500 to-blue-600',
-      action: 'Start Chat'
-    },
     {
       title: 'Email Support',
       description: 'Send us a detailed message about your issue',
       icon: Mail,
       color: 'from-green-500 to-green-600',
-      action: 'Send Email'
+      action: 'Send Email',
+      link: 'mailto:pharmacometric@gmail.com'
     },
     {
-      title: 'Phone Support',
-      description: 'Speak directly with our technical experts',
-      icon: Phone,
+      title: 'LinkedIn Page',
+      description: 'Connect with us on LinkedIn for updates and discussions',
+      icon: Linkedin,
       color: 'from-purple-500 to-purple-600',
-      action: 'Call Now'
+      action: 'Visit LinkedIn',
+      link: 'https://www.linkedin.com/company/pharmacometricsai'
     },
     {
-      title: 'Knowledge Base',
-      description: 'Browse our comprehensive help articles',
-      icon: FileText,
+      title: 'GitHub Repository',
+      description: 'Access our open source code and documentation',
+      icon: Github,
       color: 'from-orange-500 to-orange-600',
-      action: 'Browse Articles'
+      action: 'Visit GitHub',
+      link: 'https://github.com/pharmacometric/pkviz.pharmacometrics.ai'
     }
   ];
 
@@ -74,7 +70,7 @@ const HelpPage: React.FC = () => {
         </motion.div>
 
         {/* Contact Options */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {helpOptions.map((option, index) => {
             const Icon = option.icon;
             return (
@@ -94,9 +90,20 @@ const HelpPage: React.FC = () => {
                 <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
                   {option.description}
                 </p>
-                <button className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
-                  {option.action}
-                </button>
+                {option.link ? (
+                  <a
+                    href={option.link}
+                    target={option.link.startsWith('mailto:') ? '_self' : '_blank'}
+                    rel={option.link.startsWith('mailto:') ? '' : 'noopener noreferrer'}
+                    className="block w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 text-center"
+                  >
+                    {option.action}
+                  </a>
+                ) : (
+                  <button className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200">
+                    {option.action}
+                  </button>
+                )}
               </motion.div>
             );
           })}

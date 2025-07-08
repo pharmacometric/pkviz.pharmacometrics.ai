@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { saveAs } from 'file-saver';
-import { Download, BarChart3, ChevronDown, X } from 'lucide-react';
+import { Download, BarChart3, ChevronDown, X, Settings, RefreshCw } from 'lucide-react';
 import { PharmacokineticModel, PatientParameters, PlotSettings } from '../types';
 import { PKSolver } from '../utils/PKSolver';
 
@@ -11,6 +11,7 @@ interface ModelVisualizationProps {
   height?: number;
   patient1Params: PatientParameters;
   patient2Params: PatientParameters;
+  onRedrawPlot?: () => void;
 }
 
 const ModelVisualization: React.FC<ModelVisualizationProps> = ({ 
@@ -18,7 +19,8 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
   width = 600, 
   height = 400,
   patient1Params,
-  patient2Params
+  patient2Params,
+  onRedrawPlot
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
@@ -30,8 +32,8 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     fontSize: 12,
     xAxisMin: 0,
     xAxisMax: 24,
-    yAxisMin: 0.1,
-    yAxisMax: 100,
+    yAxisMin: 0.001,
+    yAxisMax: 50,
     width: 800,
     height: 600,
     patient1Color: '#3b82f6',
@@ -39,14 +41,12 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
   });
   const solver = PKSolver.getInstance();
 
-  // Auto-redraw when plot settings change
-  useEffect(() => {
-    // Force re-render when any plot setting changes
-    const timeoutId = setTimeout(() => {
-      // This effect will trigger the main useEffect below
-    }, 100);
-    return () => clearTimeout(timeoutId);
-  }, [plotSettings]);
+  // Force re-render when redraw is triggered
+  const handleRedrawPlot = () => {
+    if (onRedrawPlot) {
+      onRedrawPlot();
+    }
+  };
 
   const generatePatientData = (patientParams: PatientParameters) => {
     const { dose, numberOfDoses, frequency, parameters } = patientParams;
@@ -255,18 +255,14 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     setShowDownloadOptions(false);
   };
 
-  // Auto-redraw when plot settings change
-  useEffect(() => {
-    // This will trigger a re-render of the main plot when settings change
-  }, [plotSettings]);
-
   useEffect(() => {
     if (!svgRef.current) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    const margin = { top: 20, right: 20, bottom: 60, left: 60 };
+    // Use plot settings for dimensions and styling
+    const margin = { top: 40, right: 80, bottom: 80, left: 80 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -290,13 +286,13 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     if (!concExtent[1] || concExtent[1] <= 0) concExtent[1] = 100;
 
     // Scales
-    const xScale = d3.scaleLinear()
-      .domain(timeExtent)
+    const xScale = d3.scaleLinear() 
+      .domain([plotSettings.xAxisMin, plotSettings.xAxisMax])
       .range([0, innerWidth]);
 
     const yScale = scaleType === 'log' 
-      ? d3.scaleLog().domain(concExtent).range([innerHeight, 0])
-      : d3.scaleLinear().domain([0, concExtent[1]]).range([innerHeight, 0]);
+      ? d3.scaleLog().domain([plotSettings.yAxisMin, plotSettings.yAxisMax]).range([innerHeight, 0])
+      : d3.scaleLinear().domain([plotSettings.yAxisMin, plotSettings.yAxisMax]).range([innerHeight, 0]);
 
     // Line generator
     const line = d3.line<{ time: number; concentration: number }>()
@@ -309,22 +305,26 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(d3.axisBottom(xScale))
+      .style('font-size', `${plotSettings.fontSize}px`)
       .append('text')
       .attr('x', innerWidth / 2)
-      .attr('y', 35)
-      .attr('fill', 'black')
+      .attr('y', 50)
+      .attr('fill', 'currentColor')
       .style('text-anchor', 'middle')
-      .text('Time (hours)');
+      .style('font-size', `${plotSettings.fontSize}px`)
+      .text(plotSettings.xAxisTitle);
 
     g.append('g')
       .call(d3.axisLeft(yScale))
+      .style('font-size', `${plotSettings.fontSize}px`)
       .append('text')
       .attr('transform', 'rotate(-90)')
-      .attr('y', -45)
+      .attr('y', -60)
       .attr('x', -innerHeight / 2)
-      .attr('fill', 'black')
+      .attr('fill', 'currentColor')
       .style('text-anchor', 'middle')
-      .text(`Concentration (mg/L) ${scaleType === 'log' ? '- Log Scale' : '- Linear Scale'}`);
+      .style('font-size', `${plotSettings.fontSize}px`)
+      .text(plotSettings.yAxisTitle);
 
     // Add grid
     g.append('g')
@@ -368,11 +368,12 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     // Add title
     svg.append('text')
       .attr('x', width / 2)
-      .attr('y', 15)
+      .attr('y', 25)
       .attr('text-anchor', 'middle')
-      .style('font-size', '16px')
+      .style('font-size', `${plotSettings.fontSize + 4}px`)
       .style('font-weight', 'bold')
-      .text(`${model.name} - Patient Comparison`);
+      .attr('fill', 'currentColor')
+      .text(plotSettings.title);
 
     // Add legend
     const legend = svg.append('g')
@@ -388,7 +389,8 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     legend.append('text')
       .attr('x', 30)
       .attr('y', 12)
-      .style('font-size', '12px')
+      .style('font-size', `${plotSettings.fontSize}px`)
+      .attr('fill', 'currentColor')
       .text('Patient 1');
 
     legend.append('rect')
@@ -401,7 +403,8 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
     legend.append('text')
       .attr('x', 30)
       .attr('y', 32)
-      .style('font-size', '12px')
+      .style('font-size', `${plotSettings.fontSize}px`)
+      .attr('fill', 'currentColor')
       .text('Patient 2');
 
   }, [model, width, height, patient1Params, patient2Params, scaleType, plotSettings]);
@@ -414,7 +417,7 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Scale:
+              Y-Scale:
             </label>
             <select
               value={scaleType}
@@ -432,8 +435,8 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
             onClick={() => setShowDownloadOptions(!showDownloadOptions)}
             className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
           >
-            <Download className="w-4 h-4" />
-            Download Plot
+            <Settings className="w-4 h-4" />
+            Plot Settings
             <ChevronDown className="w-4 h-4" />
           </button>
           
@@ -573,7 +576,7 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
                         type="number"
                         value={plotSettings.yAxisMin}
                         onChange={(e) => {
-                          setPlotSettings(prev => ({ ...prev, yAxisMin: parseFloat(e.target.value) || 0.1 }));
+                          setPlotSettings(prev => ({ ...prev, yAxisMin: parseFloat(e.target.value) || 0.001 }));
                         }}
                         className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                         step="0.1"
@@ -583,7 +586,7 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
                         type="number"
                         value={plotSettings.yAxisMax}
                         onChange={(e) => {
-                          setPlotSettings(prev => ({ ...prev, yAxisMax: parseFloat(e.target.value) || 100 }));
+                          setPlotSettings(prev => ({ ...prev, yAxisMax: parseFloat(e.target.value) || 50 }));
                         }}
                         className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                         step="0.1"
@@ -620,14 +623,22 @@ const ModelVisualization: React.FC<ModelVisualizationProps> = ({
                     />
                   </div>
                 </div>
-                
                 <button
                   onClick={downloadPlot}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm mt-4"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm mt-4"
                 >
                   <Download className="w-4 h-4" />
                   Download Plot
                 </button>
+                <button
+                  onClick={handleRedrawPlot}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm mt-4"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Reset Plot
+                </button>
+                
+                
               </div>
             </div>
           )}

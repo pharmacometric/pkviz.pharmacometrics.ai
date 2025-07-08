@@ -306,3 +306,10 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 }
+.dfsf{height: 80vh; align-content: center;}
+
+/* Styling for Webkit-based browsers (Chrome, Safari, Edge Chromium, Opera) */
+input[type=range]{
+  background-color: gray!important; /* Set background color to gray */
+}
+

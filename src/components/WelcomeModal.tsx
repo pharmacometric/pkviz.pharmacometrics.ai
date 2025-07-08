@@ -63,8 +63,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
                   <Activity className="w-8 h-8" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">Welcome to ModV</h1>
-                  <p className="text-blue-100 text-lg">Advanced Pharmacokinetic Modeling Platform</p>
+                  <h1 className="text-3xl font-bold">Welcome to PKVis</h1>
+                  <p className="text-blue-100 text-lg">Learn Pharmacokinetic Modeling</p>
                 </div>
               </div>
             </div>
@@ -73,67 +73,17 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ isOpen, onClose }) => {
             <div className="p-8">
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                  Explore Drug Disposition with Precision
+                  Explore and learn about PK models and effect of parameters
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
-                  ModV is a comprehensive platform for pharmacokinetic modeling and simulation. 
-                  Whether you're a researcher, clinician, or student, our tools help you understand 
-                  and predict drug behavior in the human body with industry-leading accuracy.
+                  PKVis is a comprehensive platform for learning abou tpharmacokinetic models and the effect of altering parameters on PK. 
+                  Whether you're a researcher, clinician, or student, our tools help you understand PK models.
                 </p>
               </div>
 
-              {/* Features Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {features.map((feature, index) => {
-                  const Icon = feature.icon;
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl"
-                    >
-                      <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                          {feature.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          {feature.description}
-                        </p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+             
 
-              {/* Getting Started */}
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                  🚀 Getting Started
-                </h3>
-                <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    Use the search bar to find specific pharmacokinetic models
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    Explore the model library to browse all available models
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    Click on any model to access detailed parameters and simulations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    Adjust patient parameters to compare different scenarios
-                  </li>
-                </ul>
-              </div>
+              
 
               {/* Action Button */}
               <div className="text-center">

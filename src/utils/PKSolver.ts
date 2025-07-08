@@ -327,24 +327,92 @@ export class PKSolver {
    * Get ODE system for TMDD model
    */
   public getTMDDSystem(params: Record<string, number>, dose: number = 100): ODESystem {
-    const CL = params.CL || 0.1;
+    const kel = params.kel || 0.1;
     const V = params.V || 5.0;
-    const Vmax = params.Vmax || 10.0;
-    const Km = params.Km || 1.0;
+    const kon = params.kon || 0.1;
+    const koff = params.koff || 0.01;
+    const kint = params.kint || 0.1;
+    const R0 = params.R0 || 1.0;
+    const kdeg = params.kdeg || 0.01;
+    const ksyn = kdeg * R0; // At steady state: ksyn = kdeg * R0
 
     return {
       equations: (t: number, y: number[], p: Record<string, number>) => {
-        const [A1] = y; // Amount in central compartment
-        const C1 = A1 / V; // Concentration
+        const [L, R, P] = y; // Free drug, free target, drug-target complex
         
-        // Linear + Michaelis-Menten elimination
-        const linearCL = CL * C1;
-        const nonlinearCL = (Vmax * C1) / (Km + C1);
+        // Full TMDD model
+        const dLdt = -kel * L - kon * L * R + koff * P;
+        const dRdt = ksyn - kdeg * R - kon * L * R + koff * P;
+        const dPdt = kon * L * R - koff * P - kint * P;
         
-        return [-(linearCL + nonlinearCL) * V]; // dA1/dt
+        return [dLdt, dRdt, dPdt];
       },
-      initialConditions: [dose],
-      parameters: { CL, V, Vmax, Km }
+      initialConditions: [dose/V, R0, 0], // Initial free drug, free target, and complex
+      parameters: { kel, V, kon, koff, kint, R0, kdeg, ksyn }
+    };
+  }
+
+  /**
+   * Get ODE system for TMDD with oral absorption model
+   */
+  public getTMDDOralSystem(params: Record<string, number>, dose: number = 100): ODESystem {
+    const kel = params.kel || 0.1;
+    const V = params.V || 5.0;
+    const ka = params.ka || 0.5;
+    const F = params.F || 0.8;
+    const kon = params.kon || 0.1;
+    const koff = params.koff || 0.01;
+    const kint = params.kint || 0.1;
+    const R0 = params.R0 || 1.0;
+    const kdeg = params.kdeg || 0.01;
+    const ksyn = kdeg * R0; // At steady state: ksyn = kdeg * R0
+
+    return {
+      equations: (t: number, y: number[], p: Record<string, number>) => {
+        const [A, L, R, P] = y; // Absorption compartment, free drug, free target, drug-target complex
+        
+        // TMDD model with oral absorption
+        const dAdt = -ka * A;
+        const dLdt = ka * A / V - kel * L - kon * L * R + koff * P;
+        const dRdt = ksyn - kdeg * R - kon * L * R + koff * P;
+        const dPdt = kon * L * R - koff * P - kint * P;
+        
+        return [dAdt, dLdt, dRdt, dPdt];
+      },
+      initialConditions: [F * dose, 0, R0, 0], // Initial amount in absorption compartment, free drug, free target, and complex
+      parameters: { kel, V, ka, F, kon, koff, kint, R0, kdeg, ksyn }
+    };
+  }
+
+  /**
+   * Get ODE system for TMDD with Michaelis-Menten elimination model
+   */
+  public getTMDDMMSystem(params: Record<string, number>, dose: number = 100): ODESystem {
+    const kel = params.kel || 0.1;
+    const V = params.V || 5.0;
+    const Vmax = params.Vmax || 10.0;
+    const Km = params.Km || 1.0;
+    const kon = params.kon || 0.1;
+    const koff = params.koff || 0.01;
+    const kint = params.kint || 0.1;
+    const R0 = params.R0 || 1.0;
+    const kdeg = params.kdeg || 0.01;
+    const ksyn = kdeg * R0; // At steady state: ksyn = kdeg * R0
+
+    return {
+      equations: (t: number, y: number[], p: Record<string, number>) => {
+        const [L, R, P] = y; // Free drug, free target, drug-target complex
+        
+        // TMDD model with additional Michaelis-Menten elimination
+        const mmElimination = (Vmax * L) / (Km + L);
+        const dLdt = -kel * L - mmElimination - kon * L * R + koff * P;
+        const dRdt = ksyn - kdeg * R - kon * L * R + koff * P;
+        const dPdt = kon * L * R - koff * P - kint * P;
+        
+        return [dLdt, dRdt, dPdt];
+      },
+      initialConditions: [dose/V, R0, 0], // Initial free drug, free target, and complex
+      parameters: { kel, V, Vmax, Km, kon, koff, kint, R0, kdeg, ksyn }
     };
   }
 
@@ -763,6 +831,10 @@ export class PKSolver {
         return this.getCombinedEliminationSystem(params, dose);
       case 'tmdd':
         return this.getTMDDSystem(params, dose);
+      case 'tmdd-oral':
+        return this.getTMDDOralSystem(params, dose);
+      case 'tmdd-mm':
+        return this.getTMDDMMSystem(params, dose);
       default:
         return this.getOneCompartmentIVSystem(params, dose);
     }

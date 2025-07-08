@@ -1829,78 +1829,364 @@ export const pharmacokineticModels: PharmacokineticModel[] = [
     id: 'tmdd',
     name: 'TMDD (Target-Mediated Drug Disposition)',
     type: 'mechanism',
-    compartments: 1,
+    compartments: 2,
     category: 'Mechanistic',
     description: 'Model for drugs that bind specifically to their pharmacological target',
     longDescription: 'Target-Mediated Drug Disposition (TMDD) models describe the pharmacokinetics of drugs that bind with high affinity to their pharmacological target. This binding significantly affects the drug\'s disposition. TMDD is commonly observed with monoclonal antibodies, biologics, and drugs with specific high-affinity binding sites.',
     parameters: [
       {
+        symbol: 'kel',
+        name: 'Elimination Rate Constant',
+        description: 'First-order elimination rate constant for free drug',
+        unit: 'h⁻¹',
+        typicalRange: '0.001 - 0.1 h⁻¹',
+        estimable: true
+      },
+      {
         symbol: 'V',
         name: 'Volume of Distribution',
-        description: 'Central volume of distribution',
-        unit: 'L or L/kg',
-        typicalRange: '0.05 - 0.2 L/kg',
+        description: 'Volume of the central compartment',
+        unit: 'L',
+        typicalRange: '3 - 15 L',
         estimable: true
       },
       {
-        symbol: 'CL',
-        name: 'Linear Clearance',
-        description: 'Non-specific clearance',
-        unit: 'L/h or L/h/kg',
-        typicalRange: '0.001 - 0.1 L/h/kg',
+        symbol: 'kon',
+        name: 'Association Rate Constant',
+        description: 'Second-order rate constant for drug-target binding',
+        unit: 'L/(nmol·h)',
+        typicalRange: '0.1 - 10 L/(nmol·h)',
         estimable: true
       },
       {
-        symbol: 'Vmax',
-        name: 'Maximum Binding Rate',
-        description: 'Maximum rate of target-mediated elimination',
-        unit: 'mg/h or mg/h/kg',
-        typicalRange: '0.1 - 100 mg/h/kg',
+        symbol: 'koff',
+        name: 'Dissociation Rate Constant',
+        description: 'First-order rate constant for drug-target complex dissociation',
+        unit: 'h⁻¹',
+        typicalRange: '0.01 - 1 h⁻¹',
         estimable: true
       },
       {
-        symbol: 'Km',
-        name: 'Michaelis Constant',
-        description: 'Concentration at half-maximum binding',
-        unit: 'mg/L or µg/mL',
-        typicalRange: '0.1 - 50 µg/mL',
+        symbol: 'kint',
+        name: 'Internalization Rate Constant',
+        description: 'First-order rate constant for drug-target complex internalization',
+        unit: 'h⁻¹',
+        typicalRange: '0.01 - 0.5 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'R0',
+        name: 'Baseline Target Concentration',
+        description: 'Baseline concentration of the target in the absence of drug',
+        unit: 'nmol/L',
+        typicalRange: '0.1 - 10 nmol/L',
+        estimable: true
+      },
+      {
+        symbol: 'kdeg',
+        name: 'Target Degradation Rate Constant',
+        description: 'First-order rate constant for target degradation',
+        unit: 'h⁻¹',
+        typicalRange: '0.001 - 0.1 h⁻¹',
         estimable: true
       }
     ],
     equations: [
-      'dC/dt = -CL×C/V - Vmax×C/(Km + C)',
-      'Total clearance = CL + Vmax/(Km + C)',
-      'Non-linear kinetics at low concentrations',
-      'Linear kinetics at high concentrations'
+      'dL/dt = -kel×L - kon×L×R + koff×P',
+      'dR/dt = ksyn - kdeg×R - kon×L×R + koff×P',
+      'dP/dt = kon×L×R - koff×P - kint×P',
+      'ksyn = kdeg×R0 (at steady state)',
+      'L = free drug concentration',
+      'R = free target concentration',
+      'P = drug-target complex concentration'
     ],
     applications: [
       'Monoclonal antibodies',
       'Therapeutic proteins',
       'Biologics with specific targets',
-      'Drugs with saturable binding'
+      'Drugs with saturable binding',
+      'Receptor-mediated endocytosis'
     ],
     advantages: [
       'Mechanistically based',
       'Explains non-linear kinetics',
       'Predicts target occupancy',
-      'Guides dose selection'
+      'Guides dose selection',
+      'Accounts for target dynamics'
     ],
     limitations: [
       'Complex parameter estimation',
       'Requires rich data',
       'Assumptions about target kinetics',
-      'May need additional compartments'
+      'May need additional compartments',
+      'Computationally intensive'
     ],
     references: [
+      'Levy G. Pharmacologic target-mediated drug disposition. Clin Pharmacol Ther, 1994',
       'Mager DE, Jusko WJ. General pharmacokinetic model for drugs exhibiting target-mediated drug disposition. J Pharmacokinet Pharmacodyn, 2001',
-      'Gibiansky L, et al. Target-mediated drug disposition model: approximations, identifiability of model parameters and applications to the population pharmacokinetic-pharmacodynamic modeling of biologics. Expert Opin Drug Metab Toxicol, 2008'
+      'Gibiansky L, et al. Target-mediated drug disposition model: approximations, identifiability of model parameters and applications to the population pharmacokinetic-pharmacodynamic modeling of biologics. Expert Opin Drug Metab Toxicol, 2008',
+      'Peletier LA, Gabrielsson J. Dynamics of target-mediated drug disposition: characteristic profiles and parameter identification. J Pharmacokinet Pharmacodyn, 2012'
     ],
     extendedDescription: [
-      'Target-Mediated Drug Disposition (TMDD) models describe the pharmacokinetics of drugs that bind with high affinity to their pharmacological target. This binding significantly affects the drug\'s disposition. TMDD is commonly observed with monoclonal antibodies, biologics, and drugs with specific high-affinity binding sites.',
-      'The TMDD model accounts for the nonlinear pharmacokinetics that result from saturable binding to the target. At low concentrations, the target is not saturated and elimination appears nonlinear. At high concentrations, the target becomes saturated and elimination becomes linear.',
-      'Clinical applications include monoclonal antibodies and therapeutic proteins where target binding significantly affects pharmacokinetics. The model helps optimize dosing to achieve target saturation while minimizing unnecessary exposure.',
-      'The model parameters provide insights into target biology and drug-target interactions. Understanding these relationships is crucial for dose selection and predicting the effects of target expression changes on drug disposition.',
-      'TMDD models are increasingly important in the development of biologics and targeted therapies, where understanding target-mediated elimination is essential for rational dose selection and optimization of therapeutic outcomes.'
+      "Target-mediated drug disposition (TMDD) is a phenomenon where the binding of a drug to its pharmacological target significantly influences the drug's pharmacokinetic behavior. This model was first proposed by Levy in 1994 and has since become essential for describing the complex kinetics of many biologics and high-affinity drugs.",
+      "The full TMDD model consists of three compartments: free drug (L), free target (R), and drug-target complex (P). The model accounts for the synthesis and degradation of the target, binding and dissociation of the drug-target complex, and internalization of the complex.",
+      "At low drug concentrations, target binding can significantly reduce free drug concentrations, leading to nonlinear pharmacokinetics. As drug concentrations increase and saturate the target, the kinetics become more linear as the contribution of target-mediated elimination becomes proportionally smaller.",
+      "Several approximations of the full TMDD model exist, including the quasi-steady-state (QSS), rapid binding (RB), and Michaelis-Menten (MM) approximations. These simplifications are often used when data is insufficient to estimate all parameters of the full model or to reduce computational complexity.",
+      "TMDD models are particularly important for monoclonal antibodies, therapeutic proteins, and other biologics that often have high affinity for their targets and relatively low target concentrations in the body."
+    ]
+  },
+  {
+    id: 'tmdd-oral',
+    name: 'TMDD with Oral Absorption',
+    type: 'mechanism',
+    compartments: 3,
+    category: 'Mechanistic',
+    description: 'TMDD model with oral absorption into the central compartment',
+    longDescription: 'This model combines target-mediated drug disposition with oral absorption kinetics. It describes the pharmacokinetics of orally administered drugs that bind with high affinity to their pharmacological target, accounting for absorption from the gastrointestinal tract before entering the central compartment where target binding occurs.',
+    parameters: [
+      {
+        symbol: 'kel',
+        name: 'Elimination Rate Constant',
+        description: 'First-order elimination rate constant for free drug',
+        unit: 'h⁻¹',
+        typicalRange: '0.001 - 0.1 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'V',
+        name: 'Volume of Distribution',
+        description: 'Volume of the central compartment',
+        unit: 'L',
+        typicalRange: '3 - 15 L',
+        estimable: true
+      },
+      {
+        symbol: 'ka',
+        name: 'Absorption Rate Constant',
+        description: 'First-order absorption rate constant from GI tract',
+        unit: 'h⁻¹',
+        typicalRange: '0.1 - 2 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'F',
+        name: 'Bioavailability',
+        description: 'Fraction of dose that reaches systemic circulation',
+        unit: 'unitless',
+        typicalRange: '0.1 - 1',
+        estimable: true
+      },
+      {
+        symbol: 'kon',
+        name: 'Association Rate Constant',
+        description: 'Second-order rate constant for drug-target binding',
+        unit: 'L/(nmol·h)',
+        typicalRange: '0.1 - 10 L/(nmol·h)',
+        estimable: true
+      },
+      {
+        symbol: 'koff',
+        name: 'Dissociation Rate Constant',
+        description: 'First-order rate constant for drug-target complex dissociation',
+        unit: 'h⁻¹',
+        typicalRange: '0.01 - 1 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'kint',
+        name: 'Internalization Rate Constant',
+        description: 'First-order rate constant for drug-target complex internalization',
+        unit: 'h⁻¹',
+        typicalRange: '0.01 - 0.5 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'R0',
+        name: 'Baseline Target Concentration',
+        description: 'Baseline concentration of the target in the absence of drug',
+        unit: 'nmol/L',
+        typicalRange: '0.1 - 10 nmol/L',
+        estimable: true
+      },
+      {
+        symbol: 'kdeg',
+        name: 'Target Degradation Rate Constant',
+        description: 'First-order rate constant for target degradation',
+        unit: 'h⁻¹',
+        typicalRange: '0.001 - 0.1 h⁻¹',
+        estimable: true
+      }
+    ],
+    equations: [
+      'dA/dt = -ka×A',
+      'dL/dt = ka×A/V - kel×L - kon×L×R + koff×P',
+      'dR/dt = ksyn - kdeg×R - kon×L×R + koff×P',
+      'dP/dt = kon×L×R - koff×P - kint×P',
+      'ksyn = kdeg×R0 (at steady state)',
+      'A = amount in absorption compartment',
+      'L = free drug concentration',
+      'R = free target concentration',
+      'P = drug-target complex concentration'
+    ],
+    applications: [
+      'Orally administered biologics',
+      'Small molecules with high target affinity',
+      'Drugs with significant first-pass metabolism',
+      'Therapeutic proteins with oral delivery systems',
+      'Novel oral formulations of antibody mimetics'
+    ],
+    advantages: [
+      'Combines oral PK with target binding',
+      'Accounts for absorption limitations',
+      'Predicts bioavailability effects on target engagement',
+      'Useful for oral drug development',
+      'Helps optimize dosing regimens'
+    ],
+    limitations: [
+      'Increased model complexity',
+      'More parameters to estimate',
+      'Requires rich sampling data',
+      'May need transit compartments for complex absorption',
+      'Challenging parameter identifiability'
+    ],
+    references: [
+      'Levy G. Pharmacologic target-mediated drug disposition. Clin Pharmacol Ther, 1994',
+      'Mager DE, Jusko WJ. General pharmacokinetic model for drugs exhibiting target-mediated drug disposition. J Pharmacokinet Pharmacodyn, 2001',
+      'Gibiansky L, et al. Target-mediated drug disposition model: approximations, identifiability of model parameters and applications to the population pharmacokinetic-pharmacodynamic modeling of biologics. Expert Opin Drug Metab Toxicol, 2008',
+      'Peletier LA, Gabrielsson J. Dynamics of target-mediated drug disposition: characteristic profiles and parameter identification. J Pharmacokinet Pharmacodyn, 2012'
+    ],
+    extendedDescription: [
+      "This model extends the standard TMDD framework by incorporating an oral absorption phase, making it suitable for orally administered drugs that exhibit target-mediated disposition.",
+      "The absorption process is modeled as a first-order process from the gastrointestinal tract to the central compartment, where the drug can then interact with its target according to standard TMDD principles.",
+      "The model accounts for bioavailability (F), which represents the fraction of the administered dose that reaches the systemic circulation. This is particularly important for orally administered drugs that may undergo significant first-pass metabolism.",
+      "Like the standard TMDD model, this model describes the complex interplay between free drug, free target, and drug-target complex, but with the added complexity of the absorption phase.",
+      "This model is particularly useful for developing oral formulations of biologics or small molecules with high target affinity, where understanding both the absorption kinetics and target binding is crucial for predicting drug exposure and efficacy."
+    ]
+  },
+  {
+    id: 'tmdd-mm',
+    name: 'TMDD with Michaelis-Menten Elimination',
+    type: 'mechanism',
+    compartments: 2,
+    category: 'Mechanistic',
+    description: 'TMDD model with additional Michaelis-Menten elimination from central compartment',
+    longDescription: 'This model combines target-mediated drug disposition with Michaelis-Menten elimination kinetics. It describes drugs that not only bind to their pharmacological target but also undergo saturable elimination processes such as enzyme-mediated metabolism or active transport, providing a comprehensive framework for drugs with multiple non-linear disposition mechanisms.',
+    parameters: [
+      {
+        symbol: 'kel',
+        name: 'Linear Elimination Rate Constant',
+        description: 'First-order elimination rate constant for free drug',
+        unit: 'h⁻¹',
+        typicalRange: '0.001 - 0.1 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'V',
+        name: 'Volume of Distribution',
+        description: 'Volume of the central compartment',
+        unit: 'L',
+        typicalRange: '3 - 15 L',
+        estimable: true
+      },
+      {
+        symbol: 'Vmax',
+        name: 'Maximum Elimination Rate',
+        description: 'Maximum rate of saturable elimination',
+        unit: 'mg/h',
+        typicalRange: '1 - 100 mg/h',
+        estimable: true
+      },
+      {
+        symbol: 'Km',
+        name: 'Michaelis-Menten Constant',
+        description: 'Concentration at half-maximum elimination rate',
+        unit: 'mg/L',
+        typicalRange: '0.1 - 50 mg/L',
+        estimable: true
+      },
+      {
+        symbol: 'kon',
+        name: 'Association Rate Constant',
+        description: 'Second-order rate constant for drug-target binding',
+        unit: 'L/(nmol·h)',
+        typicalRange: '0.1 - 10 L/(nmol·h)',
+        estimable: true
+      },
+      {
+        symbol: 'koff',
+        name: 'Dissociation Rate Constant',
+        description: 'First-order rate constant for drug-target complex dissociation',
+        unit: 'h⁻¹',
+        typicalRange: '0.01 - 1 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'kint',
+        name: 'Internalization Rate Constant',
+        description: 'First-order rate constant for drug-target complex internalization',
+        unit: 'h⁻¹',
+        typicalRange: '0.01 - 0.5 h⁻¹',
+        estimable: true
+      },
+      {
+        symbol: 'R0',
+        name: 'Baseline Target Concentration',
+        description: 'Baseline concentration of the target in the absence of drug',
+        unit: 'nmol/L',
+        typicalRange: '0.1 - 10 nmol/L',
+        estimable: true
+      },
+      {
+        symbol: 'kdeg',
+        name: 'Target Degradation Rate Constant',
+        description: 'First-order rate constant for target degradation',
+        unit: 'h⁻¹',
+        typicalRange: '0.001 - 0.1 h⁻¹',
+        estimable: true
+      }
+    ],
+    equations: [
+      'dL/dt = -kel×L - (Vmax×L)/(Km + L) - kon×L×R + koff×P',
+      'dR/dt = ksyn - kdeg×R - kon×L×R + koff×P',
+      'dP/dt = kon×L×R - koff×P - kint×P',
+      'ksyn = kdeg×R0 (at steady state)',
+      'L = free drug concentration',
+      'R = free target concentration',
+      'P = drug-target complex concentration'
+    ],
+    applications: [
+      'Biologics with enzymatic degradation',
+      'Drugs with both target binding and transporter-mediated clearance',
+      'Therapeutic proteins with multiple clearance mechanisms',
+      'Antibody-drug conjugates',
+      'Drugs with complex disposition profiles'
+    ],
+    advantages: [
+      'Accounts for multiple non-linear processes',
+      'More physiologically realistic for many drugs',
+      'Explains complex PK profiles',
+      'Separates target-mediated from other non-linear processes',
+      'Useful for drugs with multiple mechanisms of disposition'
+    ],
+    limitations: [
+      'Highly complex parameter estimation',
+      'Requires extensive data for parameter identification',
+      'Potential for overparameterization',
+      'Challenging to distinguish between different non-linear mechanisms',
+      'Computationally intensive simulations'
+    ],
+    references: [
+      'Levy G. Pharmacologic target-mediated drug disposition. Clin Pharmacol Ther, 1994',
+      'Mager DE, Jusko WJ. General pharmacokinetic model for drugs exhibiting target-mediated drug disposition. J Pharmacokinet Pharmacodyn, 2001',
+      'Gibiansky L, et al. Target-mediated drug disposition model: approximations, identifiability of model parameters and applications to the population pharmacokinetic-pharmacodynamic modeling of biologics. Expert Opin Drug Metab Toxicol, 2008',
+      'Yan X, et al. Simultaneous modeling of the pharmacokinetics and pharmacodynamics of a unique oral direct thrombin inhibitor. J Pharmacokinet Pharmacodyn, 2006'
+    ],
+    extendedDescription: [
+      "This model combines two distinct non-linear pharmacokinetic processes: target-mediated drug disposition (TMDD) and Michaelis-Menten elimination kinetics.",
+      "While TMDD accounts for the binding of the drug to its pharmacological target, the Michaelis-Menten component describes other saturable processes such as enzymatic metabolism, active transport, or other capacity-limited elimination pathways.",
+      "This combined model is particularly useful for biologics and small molecules that undergo both specific target binding and saturable elimination processes, such as antibody-drug conjugates or drugs that are substrates for efflux transporters.",
+      "The model can help distinguish between different sources of non-linearity in pharmacokinetics, which is important for understanding the relative contributions of target binding versus other saturable processes to the overall drug disposition.",
+      "Due to its complexity and the number of parameters involved, this model typically requires rich sampling data and may benefit from prior knowledge of either the TMDD or Michaelis-Menten components to ensure reliable parameter estimation."
     ]
   }
 ];

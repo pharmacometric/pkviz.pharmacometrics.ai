@@ -26,11 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
   const menuItems = [
     { icon: Home, label: 'Dashboard', path: '/', color: 'text-blue-600' },
     { icon: Search, label: 'Search Models', path: '/search', color: 'text-green-600' },
-    { icon: Activity, label: 'Model Library', path: '/library', color: 'text-purple-600' },
-    { icon: BarChart3, label: 'Simulations', path: '/simulations', color: 'text-orange-600' },
-    { icon: Database, label: 'Data Sets', path: '/datasets', color: 'text-teal-600' },
     { icon: BookOpen, label: 'Documentation', path: '/docs', color: 'text-indigo-600' },
-    { icon: Settings, label: 'Settings', path: '/settings', color: 'text-gray-600' },
     { icon: HelpCircle, label: 'Help', path: '/help', color: 'text-pink-600' },
   ];
 
@@ -43,21 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
     >
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-3">
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ThemeToggle />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {isCollapsed && <ThemeToggle />}
-        </div>
+        
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
             <Activity className="w-6 h-6 text-white" />
@@ -70,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2 }}
               >
-                <h1 className="text-xl font-bold gradient-text">ModV</h1>
+                <h1 className="text-xl font-bold gradient-text">PKVis</h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400">PK Modeling</p>
               </motion.div>
             )}
@@ -109,7 +91,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggle }) => {
             </Link>
           );
         })}
+        <div className="flex items-center justify-between mb-3 ml-2">
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ThemeToggle />
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {isCollapsed && <ThemeToggle />}
+        </div>
       </nav>
+      
 
       {/* Toggle Button */}
       <div className="p-4 border-t border-gray-200 dark:border-gray-700">

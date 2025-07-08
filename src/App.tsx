@@ -4,34 +4,43 @@ import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Sidebar from './components/Sidebar';
 import WelcomeModal from './components/WelcomeModal';
+import MobileWarning from './components/MobileWarning';
+import { useDeviceDetection } from './hooks/useDeviceDetection';
 import Dashboard from './pages/Dashboard';
 import SearchPage from './pages/SearchPage';
 import ModelDetail from './pages/ModelDetail';
 import LibraryPage from './pages/LibraryPage';
-import SimulationsPage from './pages/SimulationsPage';
-import DatasetsPage from './pages/DatasetsPage';
 import DocsPage from './pages/DocsPage';
-import SettingsPage from './pages/SettingsPage';
 import HelpPage from './pages/HelpPage';
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const { isMobile, isTablet } = useDeviceDetection();
 
   useEffect(() => {
     console.log('Session began');
     
     // Check if user has visited before
-    const hasVisited = localStorage.getItem('modv-visited');
+    const hasVisited = localStorage.getItem('pkvis-visited');
     if (!hasVisited) {
       setShowWelcomeModal(true);
-      localStorage.setItem('modv-visited', 'true');
+      localStorage.setItem('pkvis-visited', 'true');
     }
   }, []);
 
   const toggleSidebar = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
+
+  // Show mobile warning for mobile and tablet devices
+  if (isMobile || isTablet) {
+    return (
+      <ThemeProvider>
+        <MobileWarning />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider>
@@ -48,10 +57,7 @@ function App() {
               <Route path="/search" element={<SearchPage />} />
               <Route path="/model/:id" element={<ModelDetail />} />
               <Route path="/library" element={<LibraryPage />} />
-              <Route path="/simulations" element={<SimulationsPage />} />
-              <Route path="/datasets" element={<DatasetsPage />} />
               <Route path="/docs" element={<DocsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

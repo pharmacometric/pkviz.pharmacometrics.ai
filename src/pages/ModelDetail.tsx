@@ -243,6 +243,7 @@ const ModelDetail: React.FC = () => {
               model={model} 
               patient1Params={patient1Params}
               patient2Params={patient2Params}
+              onRedrawPlot={handleVisualize}
             />
             
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 transition-colors duration-300">
