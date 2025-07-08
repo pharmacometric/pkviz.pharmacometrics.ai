@@ -10,8 +10,8 @@ __PKVis is an advanced pharmacokinetic modeling platform designed for researcher
 
 - Compare different dosing regimens and patient parameters
 
- - Visualize pharmacokinetic data with interactive plots
+- Visualize pharmacokinetic data with interactive plots
  
- - Export simulation results for further analysis
+- Export simulation results for further analysis
  
- - Understand complex drug-target interactions through TMDD models
+- Understand complex drug-target interactions through TMDD models
